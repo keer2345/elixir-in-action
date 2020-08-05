@@ -1,4 +1,4 @@
 #+TITLE: Elixir in Action 2nd
 
-1. First steps
-2. Building blocks
+1. [[https://github.com/keer2345/elixir-in-action/tree/master/ch01][First steps]]
+2. [[https://github.com/keer2345/elixir-in-action/tree/master/ch02][Building blocks]]

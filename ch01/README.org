@@ -37,3 +37,7 @@ Comparison of technologies used in two real-life web servers:
 * Summary
 - Erlang is a technology for developing highly available systems that constantly provide service with little or no downtime. It has been battle tested in diverse large systems for more than two decades.
 - Elixir is a modern language that makes development for the Erlang platform much more pleasant. It helps organize code more efficiently and abstracts away boilerplate, noise, and duplication.
+
+| Up      | Next            |
+|---------+-----------------|
+| [[https://github.com/keer2345/elixir-in-action][Catalog]] | [[https://github.com/keer2345/elixir-in-action/tree/master/ch02][Building blocks]] |
