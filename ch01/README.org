@@ -1,0 +1,39 @@
+#+TITLE: First steps
+
+* Abount Erlang
+** High availability
+- Fault-tolerance
+- Scalability
+- Distribution
+- Responsiveness
+- Live update
+** Erlang concurrency
+** Server-side systems
+
+Comparison of technologies used in two real-life web servers:
+
+| Technical requirement  | Server A                     | Server B |
+|------------------------+------------------------------+----------|
+| HTTP Server            | Nginx and Phusion Passenger  | Erlang   |
+| Request processing     | Ruby and Rails               | Erlang   |
+| Long-running requests  | Go                           | Erlang   |
+| Server-wide state      | Redis                        | Erlang   |
+| Persistable data       | Redis and MongoDB            | Erlang   |
+| Background jobs        | Cron, Bash scripts, and Ruby | Erlang   |
+| Service crash recovery | Upstart                      | Erlang   |
+
+
+** The development platform
+
+* About Elixir
+- Code simpliffication
+- Composing functions
+- The big picture
+
+* Disadvantages
+- Speed
+- Ecosystem
+
+* Summary
+- Erlang is a technology for developing highly available systems that constantly provide service with little or no downtime. It has been battle tested in diverse large systems for more than two decades.
+- Elixir is a modern language that makes development for the Erlang platform much more pleasant. It helps organize code more efficiently and abstracts away boilerplate, noise, and duplication.

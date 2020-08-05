@@ -1,0 +1,82 @@
+#+TITLE: Building blocks
+
+* The Interactive shell
+#+BEGIN_SRC elixir
+> iex
+Erlang/OTP 23 [erts-11.0.3] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [hipe] [dtrace]
+
+Interactive Elixir (1.10.4) - press Ctrl+C to exit (type h() ENTER for help)
+iex(1)>
+#+END_SRC
+
+* Working with variables
+#+BEGIN_SRC elixir
+iex(1)> monthly_salary = 10000
+10000
+iex(2)> monthly_salary
+10000
+iex(3)> monthly_salary * 12
+120000
+iex(4)> monthly_salary = 11000
+11000
+iex(5)> monthly_salary
+11000
+#+END_SRC
+
+* Organizing your code
+
+
+- Modules
+- Functions
+- Function arity
+- Function visibility
+- Imports and aliases
+  - https://hexdocs.pm/elixir/Kernel.html
+- Module attributes =@pi 3.14=
+  - https://github.com/elixir-lang/ex_doc
+  - https://hexdocs.pm/elixir/typespecs.html
+- Comments
+
+* Understanding the type system
+- number
+- atom
+- tuple
+- list
+- immutability
+- map
+- binaries and bitstrings
+- string
+- first-class functions
+- other built-in types
+  - /reference/
+  - /pid/
+  - /port identifier/
+- higher-level types
+  - range
+  - keyword list
+  - mapset
+  - times and dates
+- IO list
+
+* Operators
+
+#+BEGIN_SRC elixir
+===
+!==
+
+==
+!=
+
+< > <= >=
+#+END_SRC
+
+* Macros
+* Understanding the runtime
+** Modules and functions in the runtime
+- module names and atoms
+- pure Erlang modules
+- dynamically calling functions
+** Starting the runtime
+- interactive shell
+- running script
+- the mix tools
