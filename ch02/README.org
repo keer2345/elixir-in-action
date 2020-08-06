@@ -81,6 +81,6 @@ iex(5)> monthly_salary
 - running script
 - the mix tools
 
-| Last        | Up      | Next            |
-|-------------+---------+-----------------|
-| [[https://github.com/keer2345/elixir-in-action/tree/master/ch01][First steps]] | [[https://github.com/keer2345/elixir-in-action][Catalog]] | [[https://github.com/keer2345/elixir-in-action/tree/master/ch02][Building blocks]] |
+| Last        | Up      | Next         |
+|-------------+---------+--------------|
+| [[https://github.com/keer2345/elixir-in-action/tree/master/ch01][First steps]] | [[https://github.com/keer2345/elixir-in-action][Catalog]] | [[https://github.com/keer2345/elixir-in-action/tree/master/ch03][Control flow]] |

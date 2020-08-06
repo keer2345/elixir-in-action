@@ -1,0 +1,37 @@
+#+TITLE Control flow
+
+* Pattern matching
+
+- The match operator
+- Matching tuples
+- Matching constants
+- Variables in patterns
+- Matching lists
+- Matching maps
+- Matching bitstrings and binaries
+- Compound matches
+- General behavior
+
+
+* Matching with functions
+- Multicalause functions
+- Guards
+- Multicaluse lambdas
+
+* Conditionals
+- Branching with multiclause functions
+- Classical branching constructs
+- The with special form
+
+* Loops and iterations
+- Iterationg with recursion
+- Tail function calls
+- Higher-order functions
+- Comprehensions
+- Streams
+
+
+
+| Last            | Up      | Next              |
+|-----------------+---------+-------------------|
+| [[https://github.com/keer2345/elixir-in-action/tree/master/ch02][Building blocks]] | [[https://github.com/keer2345/elixir-in-action][Catalog]] | [[https://github.com/keer2345/elixir-in-action/tree/master/ch04][Data abstractions]] |

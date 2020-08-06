@@ -2,3 +2,5 @@
 
 1. [[https://github.com/keer2345/elixir-in-action/tree/master/ch01][First steps]]
 2. [[https://github.com/keer2345/elixir-in-action/tree/master/ch02][Building blocks]]
+3. [[https://github.com/keer2345/elixir-in-action/tree/master/ch03][Control flow]]
+4. [[https://github.com/keer2345/elixir-in-action/tree/master/ch04][Data abstractions]]
