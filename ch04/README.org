@@ -1,0 +1,330 @@
+#+TITLE: Data abstractions
+
+* Abstracting with modules
+#+BEGIN_SRC elixir
+iex(19)> days = MapSet.new() |> MapSet.put(:monday) |> MapSet.put(:tuesday)
+#MapSet<[:monday, :tuesday]>
+iex(20)> days
+#MapSet<[:monday, :tuesday]>
+iex(21)> MapSet.member?(days, :monday)
+true
+#+END_SRC
+
+** Basic abstracion
+The example in this section is a simple to-do list.
+The basic version of the to-do list will support the following features:
+- Creating a new data abstraction
+- Adding new entries
+- Querying the abstraction
+
+=simple_todo.ex=:
+
+#+BEGIN_SRC elixir
+defmodule TodoList do
+  def new(), do: %{}
+
+  def add_entry(todo_list, date, title) do
+    todo_list |> Map.update(date, [title], fn titles -> [title | titles] end)
+  end
+
+  def entries(todo_list, date) do
+    todo_list |> Map.get(date, [])
+  end
+end
+#+END_SRC
+
+#+BEGIN_SRC elixir
+iex(10)> todo_list =
+           TodoList.new() |>
+             TodoList.add_entry(~D[2018-12-19], "Dentist") |>
+             TodoList.add_entry(~D[2018-12-20], "Shopping") |>
+             TodoList.add_entry(~D[2018-12-19], "Movies")
+%{~D[2018-12-19] => ["Movies", "Dentist"], ~D[2018-12-20] => ["Shopping"]}
+iex(11)> TodoList.entries(todo_list, ~D[2018-12-19])
+["Movies", "Dentist"]
+iex(12)> TodoList.entries(todo_list, ~D[2018-12-18])
+[]
+#+END_SRC
+
+** Composing abstractions
+=todo_multi_dict.ex=:
+#+BEGIN_SRC elixir
+defmodule MultiDict do
+  def new(), do: %{}
+
+  def add(dict, key, value) do
+    Map.update(dict, key, [value], &[value | &1])
+  end
+
+  def get(dict, key) do
+    Map.get(dict, key, [])
+  end
+end
+
+defmodule TodoList do
+  def new(), do: MultiDict.new()
+
+  def add_entry(todo_list, date, title) do
+    todo_list |> MultiDict.add(date, title)
+  end
+
+  def entries(todo_list, date) do
+    todo_list |> MultiDict.get(date)
+  end
+end
+#+END_SRC
+
+** Structuring data with maps
+#+BEGIN_SRC elixir
+defmodule MultiDict do
+  def new(), do: %{}
+
+  def add(dict, key, value) do
+    dict |> Map.update(key, value, &[value | &1])
+  end
+
+  def get(dict, key) do
+    dict |> Map.get(key, [])
+  end
+end
+
+defmodule TodoList do
+  def new(), do: MultiDict.new()
+
+  def add_entry(todo_list, entry) do
+    todo_list |> MultiDict.add(entry.date, entry)
+  end
+
+  def entries(todo_list, date) do
+    todo_list |> MultiDict.get(date)
+  end
+end
+#+END_SRC
+
+#+BEGIN_SRC elixir
+iex(1)> todo_list = TodoList.new() |>
+  TodoList.add_entry(%{date: ~D[2018-12-19], title: "Dentist"})
+iex(2)> TodoList.entries(todo_list, ~D[2018-12-19])
+  [%{date: ~D[2018-12-19], title: "Dentist"}]
+#+END_SRC
+
+** Abstracting with structs
+#+BEGIN_SRC elixir
+defmodule Fraction do
+  defstruct a: nil, b: nil
+
+  def new(a, b) do
+    %Fraction{a: a, b: b}
+  end
+
+  def value(%Fraction{a: a, b: b}) do
+    a / b
+  end
+
+  def add(%Fraction{a: a1, b: b1}, %Fraction{a: a2, b: b2}) do
+    new(a1 * b2 + a2 * b1, b2 * b1)
+  end
+end
+#+END_SRC
+
+#+BEGIN_SRC elixir
+% iex fraction.ex
+
+iex(1)> Fraction.add(Fraction.new(1, 2), Fraction.new(1, 4)) |> Fraction.value()
+0.75
+#+END_SRC
+
+
+In addition to maps and structs, there’s another way to structure data: [[https://hexdocs.pm/elixir/Record.html][Record]].
+
+** Data transparency
+#+BEGIN_SRC elixir
+%Fraction{a: 1, b: 4}
+iex(2)> Fraction.new(1, 4) |>
+...(2)>   Fraction.add(Fraction.new(1,4)) |>
+...(2)>   Fraction.add(Fraction.new(1,2)) |>
+...(2)>   Fraction.value()
+1.0
+#+END_SRC
+
+You can easily insert the call to ==IO.inspect/1== after every line:
+#+BEGIN_SRC elixir
+iex(4)> Fraction.new(1,4) |>
+...(4)>   IO.inspect() |>
+...(4)>   Fraction.add(Fraction.new(1,4)) |>
+...(4)>   IO.inspect() |>
+...(4)>   Fraction.add(Fraction.new(1,2)) |>
+...(4)>   IO.inspect() |>
+...(4)>   Fraction.value()
+%Fraction{a: 1, b: 4}
+%Fraction{a: 8, b: 16}
+%Fraction{a: 32, b: 32}
+1.0
+#+END_SRC
+
+
+* Working with hierarchical data
+
+** Generating IDs
+
+When adding a new entry to the list, you'll autogenerate its ID value, using incremental integers for IDs. To
+implement this, you have to do a couple of things:
+- Transform the to-do list into struct
+- Use the entry's ID as the key
+#+BEGIN_SRC elixir
+defmodule TodoList do
+  defstruct auto_id: 1, entries: %{}
+  def new(), do: %TodoList{}
+
+  def add_entry(todo_list, entry) do
+    entry = Map.put(entry, :id, todo_list.auto_id)
+    new_entries = Map.put(todo_list.entries, todo_list.auto_id, entry)
+    %TodoList{todo_list | entries: new_entries, auto_id: todo_list.auto_id + 1}
+  end
+
+  def entries(todo_list, date) do
+    todo_list.entries
+    |> Stream.filter(fn {_, entry} -> entry.date == date end)
+    |> Enum.map(fn {_, entry} -> entry end)
+  end
+end
+#+END_SRC
+
+#+BEGIN_SRC elixir
+$ iex todo_crud.ex
+iex(1)> todo_list = TodoList.new() |>
+  TodoList.add_entry(%{date: ~D[2018-12-19], title: "Dentist"}) |>
+  TodoList.add_entry(%{date: ~D[2018-12-20], title: "Shopping"}) |>
+  TodoList.add_entry(%{date: ~D[2018-12-19], title: "Movies"})
+iex(2)> todo_list
+%TodoList{
+  auto_id: 4,
+  entries: %{
+    1 => %{date: ~D[2018-12-19], id: 1, title: "Dentist"},
+    2 => %{date: ~D[2018-12-20], id: 2, title: "Shopping"},
+    3 => %{date: ~D[2018-12-19], id: 3, title: "Movies"}
+  }
+}
+iex(3)> TodoList.entries(todo_list, ~D[2018-12-19]) [
+%{date: ~D[2018-12-19], id: 1, title: "Dentist"},
+%{date: ~D[2018-12-19], id: 3, title: "Movies"} ]
+#+END_SRC
+
+
+** Updating entries
+#+BEGIN_SRC elixir
+defmodule TodoList do
+
+  # ...
+
+  def update_entry(todo_list, %{} = new_entry) do
+    update_entry(todo_list, new_entry.id, fn _ -> new_entry end)
+  end
+
+  def update_entry(todo_list, entry_id, updater_fun) do
+    case Map.fetch(todo_list.entries, entry_id) do
+      :error ->
+        todo_list
+
+      {:ok, old_entry} ->
+        new_entry = updater_fun.(old_entry)
+        new_entries = Map.put(todo_list.entries, new_entry.id, new_entry)
+        %TodoList(todo_list | entries: new_entries)
+    end
+  end
+end
+
+#+END_SRC
+
+
+** Immutable hierarchical updates
+#+BEGIN_SRC elixir
+iex(1)> todo_list = %{
+  1 => %{date: ~D[2018-12-19], title: "Dentist"},
+  2 => %{date: ~D[2018-12-20], title: "Shopping"},
+  3 => %{date: ~D[2018-12-19], title: "Movies"}
+}
+iex(2)> put_in(todo_list[3].title, "Theater")
+%{
+  1 => %{date: ~D[2018-12-19], title: "Dentist"},
+  2 => %{date: ~D[2018-12-20], title: "Shopping"},
+  3 => %{date: ~D[2018-12-19], title: "Theater"}
+}
+
+iex(3)> path = [3, :title]
+[3, :title]
+iex(4)> put_in(todo_list, path, "Theater")
+%{
+  1 => %{date: ~D[2018-12-19], title: "Dentist"},
+p  2 => %{date: ~D[2018-12-20], title: "Shopping"},
+  3 => %{date: ~D[2018-12-19], title: "Theater"}
+}
+#+END_SRC
+
+** Interative updates
+=todo_builder.ex=
+#+BEGIN_SRC elixir
+defmodule TodoList do
+  defstruct auto_id: 1, entries: %{}
+
+  def new(entries \\ []) do
+    Enum.reduce(
+      entries,
+      %TodoList{},
+      &add_entry(&2, &1)
+    )
+  end
+
+  def add_entry(todo_list, entry) do
+    entry = Map.put(entry, :id, todo_list.auto_id)
+    new_entries = Map.put(todo_list.entries, todo_list.auto_id, entry)
+
+    %TodoList{todo_list | entries: new_entries, auto_id: todo_list.auto_id + 1}
+  end
+
+  def entries(todo_list, date) do
+    todo_list.entries
+    |> Stream.filter(fn {_, entry} -> entry.date = date end)
+    |> Enum.map(fn {_, entry} -> entry end)
+  end
+
+  def update_entry(todo_list, %{} = new_entry) do
+    update_entry(todo_list, new_entry.id, fn _ -> new_entry end)
+  end
+
+  def update_entry(todo_list, entry_id, updater_fun) do
+    case Map.fetch(todo_list.entries, entry_id) do
+      :error ->
+        todo_list
+
+      {:ok, old_entry} ->
+        new_entry = updater_fun.(old.entry)
+        new_entries = Map.put(todo_list.entries, new_entry.id, new_entry)
+        %TodoList{todo_list | entries: new_entries}
+    end
+  end
+
+  def delete_entry(todo_list, entry_id) do
+    %TodoList{todo_list | entries: Map.delete(todo_list.entries, entry_id)}
+  end
+end
+#+END_SRC
+
+
+** Exercise: importing from a file
+==todos.cvs=:
+#+BEGIN_SRC cvs
+2018/12/19,Dentist
+2018/12/20,Shopping
+2018/12/19,Movies
+#+END_SRC
+
+=todo_import.ex=:
+#+BEGIN_SRC elixir
+defmodule TodoList do
+  # ...
+end
+defmodule TodoList.CsvImporter do
+  # ...
+end
+#+END_SRC
